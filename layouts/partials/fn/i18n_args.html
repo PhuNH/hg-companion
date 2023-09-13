@@ -16,7 +16,24 @@ Warnings:
 {{ range $index, $arg := after 1 . }}
   {{ $param := print "%" (add $index 1) }}
   {{ if in $msg $param }}
-    {{ $msg = replace $msg $param $arg }}
+    {{ $res := "" }}
+    {{ $parts := split $msg $param }}
+    {{ $count := 0 }}
+    {{ range $i, $p := $parts }}
+      {{ if eq $i (sub (len $parts) 1) }}
+        {{ $res = print $res $p }}
+      {{ else if eq (substr $p -1) "\\" }}
+        {{ $res = print $res $p $param }}
+      {{ else }}
+        {{ $count = add $count 1 }}
+        {{ $res = print $res $p $arg }}
+      {{ end }}
+    {{ end }}
+
+    {{ if eq $count 0 }}
+      {{ warnf "%q in language %q has no %q" $msgName site.Language.Lang $param }}
+    {{ end }}
+    {{ $msg = $res }}
   {{ else }}
     {{ warnf "%q in language %q has no %q" $msgName site.Language.Lang $param }}
   {{ end }}

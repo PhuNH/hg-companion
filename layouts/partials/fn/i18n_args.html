@@ -1,0 +1,24 @@
+{{/*
+SPDX-FileCopyrightText: 2022 Phu Hung Nguyen <phu.nguyen@kdemail.net>
+SPDX-License-Identifier: LGPL-2.1-or-later
+*/}}
+
+{{/*
+Context: an array with
+- the first element being the name of an i18n string containing parameter substrings %1, %2, %3, etc.
+- other elements being arguments to substitute for parameter substrings
+Returns: the i18n string with parameter substrings substituted by other elements
+Warnings:
+- when there's no parameter substring corresponding to an argument
+*/}}
+{{ $msgName := index . 0 }}
+{{ $msg := i18n $msgName }}
+{{ range $index, $arg := after 1 . }}
+  {{ $param := print "%" (add $index 1) }}
+  {{ if in $msg $param }}
+    {{ $msg = replace $msg $param $arg }}
+  {{ else }}
+    {{ warnf "%q in language %q has no %q" $msgName site.Language.Lang $param }}
+  {{ end }}
+{{ end }}
+{{ return $msg }}

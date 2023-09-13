@@ -1,0 +1,28 @@
+{{/*
+SPDX-FileCopyrightText: 2022 Phu Hung Nguyen <phu.nguyen@kdemail.net>
+SPDX-License-Identifier: LGPL-2.1-or-later
+*/}}
+
+{{/*
+Context: an array listing keys to get in order
+Returns: the value in the data tree at the location described by the input array, or the equivalent English one if not exist in the current language.
+  Along the way when there is a key that doesn't even exist in the English tree, processing stops at that key and an empty string is returned.
+*/}}
+{{ $data := site.Data }}
+{{ $langData := index $data site.Language.Lang | default $data }}
+{{ $loopMore := true }}
+
+{{ range . }}
+  {{ if $loopMore }}
+    {{ $data = index $data . }}
+    {{ if $data }}
+      {{ $langData = index $langData . | default $data }}
+    {{ else }}
+      {{/* warnf "i18n_data: %q not found for language %q" . site.Language.Lang */}}
+      {{ $loopMore = false }}
+      {{ $langData = "" }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+
+{{ return $langData }}
